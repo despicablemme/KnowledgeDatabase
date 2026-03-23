@@ -18,19 +18,18 @@ _Learn about the person you're helping. Update this as you go._
 
 - **技术帖子汇总**：用户通过 QQ 发送技术帖子链接 → 我汇总到 `~/Documents/KnowLedgeDatabase/techDocs/` 目录，按技术领域分类。同一主题多篇帖子要**合并提炼**，重复内容合并，不同内容补充。完成后返回存放位置。
 
-- **有声书制作**：主人的电子书有声书任务
-  - **输出目录**：`~/Documents/TTSoutputs/`
+- **有声书制作（ebook-tts）**：主人的电子书有声书任务
+  - **Skill 位置**：`~/.openclaw/workspace/ebook-tts/`
+  - **支持格式**：txt、epub、mobi、pdf
+  - **输出目录**：`~/Documents/TTSoutputs/{书名}/`
   - **工作流程**：
-    1. 收到电子书后，先拆分章节文本
-    2. 每个章节文本生成语音
-    3. 以书名创建目录，存储每本书的所有文件
-  - **金瓶梅示例**：`~/Documents/TTSoutputs/金瓶梅/` 已有 102 个章节
+    1. 收到电子书文件，解析为纯文本
+    2. 按章节分割为多个 .txt 文件
+    3. 每个章节用 edge-tts 生成 .mp3 语音
   - **任务性质**：耗时任务，交给**子 agent**处理，主 agent 保持可用
-
-- **迅雷下载**：Thunder 自动化下载
-  - **Skill 位置**：`~/.openclaw/workspace/thunder-download/`
-  - **功能**：自动打开 seedhub.cc、提取磁力链接、用 thunder:// 协议启动迅雷下载
-  - **任务性质**：耗时任务（需要监控浏览器、等待下载完成），交给**子 agent**处理
+  - **脚本**：
+    - `convert_ebook.py` - 转换各格式为 txt
+    - `generate_tts.py` - 章节分割 + TTS 生成
 
 - **知识库优先**：主人提问时，先检索知识库 `~/Documents/KnowLedgeDatabase/`。如果已有记录，告诉主人"这是来自知识库的答案"。知识库可能不全，觉得不够全面解答主人的问题时，记得补充。
 
