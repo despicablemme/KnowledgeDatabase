@@ -41,6 +41,11 @@ _Update this file with lessons learned, decisions, and important context._
 - 子 agent 完成任务后，我负责汇总汇报给主人
 - **永远保持可响应状态**
 
+### 8. 子agent使用规则（教训：2026-03-23）
+- 即使是"只生成一段"只要涉及较长时间，也交给子 agent
+- 不要在自己会话里执行耗时任务
+- 教训：刚才生成东北话TTS时没有用子agent，被主人指出
+
 ### 7. 知识库优先检索（2026-03-21）
 - 主人有知识库：`~/Documents/KnowLedgeDatabase/`
 - 主人提问时，**先检索知识库**

@@ -21,8 +21,8 @@ async def generate_audio(file_path: Path):
     communicate = edge_tts.Communicate(
         text,
         voice="zh-CN-XiaoxiaoNeural",
-        rate="+10%",
-        pitch="-5Hz"
+        rate="-25%",
+        pitch="+0Hz"
     )
     await communicate.save(str(output_path))
     print(f"完成: {output_path.name}", flush=True)
