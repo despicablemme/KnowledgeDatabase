@@ -19,12 +19,18 @@ _Learn about the person you're helping. Update this as you go._
 - **技术帖子汇总**：用户通过 QQ 发送技术帖子链接 → 我汇总到 `~/Documents/KnowLedgeDatabase/techDocs/` 目录，按技术领域分类。同一主题多篇帖子要**合并提炼**，重复内容合并，不同内容补充。完成后返回存放位置。
 
 - **有声书制作**：主人的电子书有声书任务
-  - **输出目录**：`~/TTSoutputs/`
+  - **输出目录**：`~/Documents/TTSoutputs/`
   - **工作流程**：
     1. 收到电子书后，先拆分章节文本
     2. 每个章节文本生成语音
     3. 以书名创建目录，存储每本书的所有文件
-  - **金瓶梅示例**：`~/TTSoutputs/金瓶梅/001_第一回.txt` 等 102 个章节文件已存在
+  - **金瓶梅示例**：`~/Documents/TTSoutputs/金瓶梅/` 已有 102 个章节
+  - **任务性质**：耗时任务，交给**子 agent**处理，主 agent 保持可用
+
+- **迅雷下载**：Thunder 自动化下载
+  - **Skill 位置**：`~/.openclaw/workspace/thunder-download/`
+  - **功能**：自动打开 seedhub.cc、提取磁力链接、用 thunder:// 协议启动迅雷下载
+  - **任务性质**：耗时任务（需要监控浏览器、等待下载完成），交给**子 agent**处理
 
 - **知识库优先**：主人提问时，先检索知识库 `~/Documents/KnowLedgeDatabase/`。如果已有记录，告诉主人"这是来自知识库的答案"。知识库可能不全，觉得不够全面解答主人的问题时，记得补充。
 
