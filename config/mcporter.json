@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "pexels": {
+      "command": "pexels-mcp-server",
+      "args": ["--api-key", "FZowIGSpHqY7FAax31w4Q2Nb1pvpLp6ivsWfUkjiVoBeUbDTr3BuBi5k"]
+    },
+    "pixabay": {
+      "command": "pixabay-mcp",
+      "env": {
+        "PIXABAY_API_KEY": "55142089-0b50c4dc8585025339ed7d35d"
+      }
+    }
+  }
+}

@@ -113,6 +113,14 @@ Reactions are lightweight social signals. Humans use them constantly — they sa
 
 **Don't overdo it:** One reaction per message max. Pick the one that fits best.
 
+## ⚠️ 检查定时任务的正确方式
+
+OpenClaw cron 任务和系统 crontab 是**两套独立**的：
+- `crontab -l` → 系统 crontab（空的，不代表没有任务）
+- `openclaw cron list` → OpenClaw 自己的任务系统
+
+**以后检查定时任务，一律用 `openclaw cron list`**，不要用 `crontab -l`。
+
 ## Tools
 
 Skills provide your tools. When you need one, check its `SKILL.md`. Keep local notes (camera names, SSH details, voice preferences) in `TOOLS.md`.

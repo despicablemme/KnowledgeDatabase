@@ -55,11 +55,23 @@ _Update this file with lessons learned, decisions, and important context._
 - **TTS任务必须交给子agent处理**，我不被阻塞
 
 ### 9. 子agent使用规则（教训：2026-03-23）
+- **所有任务一律交给子 agent 执行**，我永远不自己执行
 - 即使是"只生成一段"只要涉及较长时间，也交给子 agent
-- 不要在自己会话里执行耗时任务
-- 教训：刚才生成东北话TTS时没有用子agent，被主人指出
+- 不要在自己会话里执行任何耗时任务
+- 我只负责：分派任务 → 监控进度 → 汇总汇报
+- **永远保持可响应状态**
 
-### 10. 任务完成后必须汇报（教训：2026-03-23）
+### 10. 检查定时任务要用 openclaw cron list（教训：2026-03-24）
+- `crontab -l` 看的是系统 crontab，可能是空的
+- OpenClaw 自己的 cron 任务要用 `openclaw cron list` 查看
+- 两者是独立的两套系统
+
+### 12. 任何耗时操作必须发子agent（教训：2026-03-24）
+- brew install、文件生成、代码编译等耗时任务，一律丢给子agent
+- 我永远不自己在主会话执行耗时操作
+- 养成习惯：先想"这耗时吗" → 耗时就spawn
+
+### 13. 任务完成后必须汇报（教训：2026-03-23）
 - 配置完任何东西后**立即主动汇报结果**
 - 不要等主人问"怎么样了"
 - 教训：Edge TTS配置好后没有主动告诉主人
@@ -74,15 +86,17 @@ _Update this file with lessons learned, decisions, and important context._
 
 ### 小红书总结
 - 主人通过 QQ 发送小红书链接
-- 我总结并保存到 `~/JarvisWorkspace/KnowLedgeDatabase/XHS/`
+- 我总结并保存到 `~/Documents/KnowLedgeDatabase/XHS/`
 - 格式参考已有的 md 文件
 - **必须同时分析图片**（用 vision 模型解析图片中的文字、表格、截图）
+- **图片也要保存到知识库**：下载图片到对应文件夹，用 Markdown 图片引用
 
 ### 技术帖子汇总
 - 主人通过 QQ 发送技术帖子链接
-- 汇总到 `~/JarvisWorkspace/KnowLedgeDatabase/techDocs/` 目录
+- 汇总到 `~/Documents/KnowLedgeDatabase/techDocs/` 目录
 - 按技术领域分类
 - 同一主题多篇帖子要**合并提炼**
+- **图片也要保存到知识库**：下载图片到对应文件夹，用 Markdown 图片引用
 
 ---
 
