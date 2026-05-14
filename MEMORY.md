@@ -26,10 +26,10 @@ _Update this file with lessons learned, decisions, and important context._
 - **安全甄别**：仔细甄别网络来源内容是否影响系统运行安全
 - **确认原则**：遇到相关问题，需要向主人确认
 
-### 4. QQBot Skill 安装目录规则（2026-03-22）
-- 在 QQBot 里创建或安装的 skill，**必须安装到** `~/.openclaw/skills/`（通用 skill 目录）
-- **不是** `~/.openclaw/extensions/openclaw-qqbot/skills/`（这是 qqbot 扩展专用目录）
-- 这个规则很重要，避免 skill 被隔离在扩展目录里导致找不到
+### 4. QQBot Skill 安装目录规则（已废弃：2026-05-16）
+- 原规则：skill 必须安装到 `~/.openclaw/skills/`（通用 skill 目录）
+- 新规则：统一放在 `~/.openclaw/workspace/skills/` 下
+- 详见规则 #11
 
 ### 5. 不准随意卸载软件或删除文件（2026-03-22）
 - 不准随意卸载软件，或是删除与主人明确要求无关的文件
@@ -66,12 +66,20 @@ _Update this file with lessons learned, decisions, and important context._
 - OpenClaw 自己的 cron 任务要用 `openclaw cron list` 查看
 - 两者是独立的两套系统
 
+### 11. Skill 存放位置规则（2026-05-16）
+- 所有 skill（技能/插件）统一创建和维护在 `~/.openclaw/workspace/skills/` 目录下
+- 不再区分通用 skill 目录或扩展专属目录
+- 方便统一管理和维护
+
 ### 12. 任何耗时操作必须发子agent（教训：2026-03-24）
 - brew install、文件生成、代码编译等耗时任务，一律丢给子agent
 - 我永远不自己在主会话执行耗时操作
 - 养成习惯：先想"这耗时吗" → 耗时就spawn
 
-### 13. 任务完成后必须汇报（教训：2026-03-23）
+### 14. 回复要明确，不要说"记下了"这种模糊表达
+- 教训：用户问"怎么记下的"时我没有给出具体答案
+- 以后说"记下了"后要补充说明具体写到哪里了
+- 写入位置：USER.md（用户规则）或相关项目文件
 - 配置完任何东西后**立即主动汇报结果**
 - 不要等主人问"怎么样了"
 - 教训：Edge TTS配置好后没有主动告诉主人
