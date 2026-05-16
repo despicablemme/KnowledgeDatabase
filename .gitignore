@@ -1,0 +1,13 @@
+# 缓存文件
+.DS_Store
+*.pyc
+__pycache__/
+*.log
+
+# 临时文件
+*.tmp
+*.swp
+*~
+
+# 工具产生的临时文件
+.openclaw/workspace-state.json
