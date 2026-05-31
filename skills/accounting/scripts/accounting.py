@@ -9,11 +9,10 @@ import json
 import os
 import sys
 from datetime import datetime, timedelta
-from collections import defaultdict
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'accounting.db')
 
-# 支出分类映射（用于自动分类）
+# 支出分类映射（预设分类，可动态扩展）
 CATEGORY_KEYWORDS = {
     '饮食': ['吃饭', '外卖', '餐厅', '食物', '零食', '水果', '饮料', '买菜', '烹饪', '餐饮', '米面', '肉类', '蔬菜', '麦当劳', '肯德基', '汉堡', '披萨'],
     '娱乐': ['电影', '游戏', '音乐', '演出', '展览', '旅游', '电影', 'KTV', '酒吧', '娱乐', '综艺', '视频', '会员'],
@@ -31,13 +30,17 @@ def get_conn():
     return sqlite3.connect(DB_PATH)
 
 def init_db():
-    """初始化数据库"""
+    """初始化数据库（删除旧库重建）"""
+    # 删除旧库（如果存在）
+    if os.path.exists(DB_PATH):
+        os.remove(DB_PATH)
+    
     conn = get_conn()
     c = conn.cursor()
     
-    # 交易明细表
+    # 交易明细表（核心数据源，唯一数据源）
     c.execute('''
-        CREATE TABLE IF NOT EXISTS transactions (
+        CREATE TABLE transactions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             type TEXT NOT NULL,
             amount REAL NOT NULL,
@@ -48,73 +51,50 @@ def init_db():
         )
     ''')
     
-    # 余额记录表
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS balance (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            balance REAL NOT NULL,
-            date DATE NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
     # 周收支汇总表
     c.execute('''
-        CREATE TABLE IF NOT EXISTS weekly_summary (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE weekly_summary (
             year INTEGER NOT NULL,
             week INTEGER NOT NULL,
             week_start DATE NOT NULL,
             week_end DATE NOT NULL,
             total_income REAL DEFAULT 0,
             total_expense REAL DEFAULT 0,
-            category_expenses TEXT,
-            UNIQUE(year, week)
+            category_expenses TEXT DEFAULT '{}',
+            PRIMARY KEY (year, week)
         )
     ''')
     
     # 月收支汇总表
     c.execute('''
-        CREATE TABLE IF NOT EXISTS monthly_summary (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE monthly_summary (
             year INTEGER NOT NULL,
             month INTEGER NOT NULL,
             total_income REAL DEFAULT 0,
             total_expense REAL DEFAULT 0,
-            category_expenses TEXT,
-            UNIQUE(year, month)
+            category_expenses TEXT DEFAULT '{}',
+            PRIMARY KEY (year, month)
         )
     ''')
     
     # 年收支汇总表
     c.execute('''
-        CREATE TABLE IF NOT EXISTS yearly_summary (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
+        CREATE TABLE yearly_summary (
             year INTEGER NOT NULL,
             total_income REAL DEFAULT 0,
             total_expense REAL DEFAULT 0,
-            category_expenses TEXT,
-            UNIQUE(year)
+            category_expenses TEXT DEFAULT '{}',
+            PRIMARY KEY (year)
         )
     ''')
     
+    # 索引
     c.execute('CREATE INDEX IF NOT EXISTS idx_trans_date ON transactions(date)')
     c.execute('CREATE INDEX IF NOT EXISTS idx_trans_type ON transactions(type)')
     c.execute('CREATE INDEX IF NOT EXISTS idx_trans_cat ON transactions(category)')
     
     conn.commit()
     conn.close()
-
-def auto_categorize(description):
-    """根据描述自动分类"""
-    if not description:
-        return '其他'
-    desc = description.lower()
-    for category, keywords in CATEGORY_KEYWORDS.items():
-        for kw in keywords:
-            if kw.lower() in desc:
-                return category
-    return '其他'
 
 def get_week_info(date):
     """获取日期所在的周信息"""
@@ -124,156 +104,184 @@ def get_week_info(date):
     week_end = date + timedelta(days=7 - weekday)
     return year, week, week_start.strftime('%Y-%m-%d'), week_end.strftime('%Y-%m-%d')
 
-def record_income(amount, description='', date=None):
-    """记录收入"""
-    if date is None:
-        date = datetime.now().strftime('%Y-%m-%d')
-    
-    conn = get_conn()
-    c = conn.cursor()
-    
-    # 插入交易记录
-    c.execute(
-        'INSERT INTO transactions (type, amount, category, description, date) VALUES (?, ?, ?, ?, ?)',
-        ('income', amount, '收入', description or '工资/收入', date)
-    )
-    
-    # 更新总储蓄余额
-    c.execute('SELECT balance FROM balance ORDER BY date DESC LIMIT 1')
-    row = c.fetchone()
-    current_balance = (row[0] + amount) if row else amount
-    c.execute('INSERT INTO balance (balance, date) VALUES (?, ?)', (current_balance, date))
-    
-    # 更新月汇总
-    dt = datetime.strptime(date, '%Y-%m-%d')
-    update_monthly_summary(c, dt.year, dt.month, income=amount)
-    
-    # 更新年汇总
-    update_yearly_summary(c, dt.year, income=amount)
-    
-    conn.commit()
-    conn.close()
-    
-    return current_balance
-
-def record_expense(amount, description='', date=None, category=None):
-    """记录支出"""
-    if date is None:
-        date = datetime.now().strftime('%Y-%m-%d')
-    
-    if category is None:
-        category = auto_categorize(description)
-    
-    conn = get_conn()
-    c = conn.cursor()
-    
-    # 插入交易记录
-    c.execute(
-        'INSERT INTO transactions (type, amount, category, description, date) VALUES (?, ?, ?, ?, ?)',
-        ('expense', amount, category, description, date)
-    )
-    
-    # 更新总储蓄余额
-    c.execute('SELECT balance FROM balance ORDER BY date DESC LIMIT 1')
-    row = c.fetchone()
-    current_balance = (row[0] - amount) if row else -amount
-    c.execute('INSERT INTO balance (balance, date) VALUES (?, ?)', (current_balance, date))
-    
-    # 更新周汇总
-    year, week, week_start, week_end = get_week_info(date)
-    update_weekly_summary(c, year, week, week_start, week_end, expense=amount, category=category)
-    
-    # 更新月汇总
-    dt = datetime.strptime(date, '%Y-%m-%d')
-    update_monthly_summary(c, dt.year, dt.month, expense=amount, category=category)
-    
-    # 更新年汇总
-    update_yearly_summary(c, dt.year, expense=amount, category=category)
-    
-    conn.commit()
-    conn.close()
-    
-    return current_balance
-
-def update_weekly_summary(c, year, week, week_start, week_end, income=0, expense=0, category=None):
-    """更新周汇总"""
-    c.execute('SELECT id, total_income, total_expense, category_expenses FROM weekly_summary WHERE year=? AND week=?',
-              (year, week))
-    row = c.fetchone()
-    
-    cat_exp = {}
-    if row and row[3]:
-        cat_exp = json.loads(row[3])
-    if category:
-        cat_exp[category] = cat_exp.get(category, 0) + expense
-    
-    if row:
-        c.execute('''UPDATE weekly_summary 
-                     SET total_income=total_income+?, total_expense=total_expense+?, category_expenses=?
-                     WHERE year=? AND week=?''',
-                  (income, expense, json.dumps(cat_exp), year, week))
-    else:
-        c.execute('''INSERT INTO weekly_summary (year, week, week_start, week_end, total_income, total_expense, category_expenses)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
-                  (year, week, week_start, week_end, income, expense, json.dumps(cat_exp)))
-
-def update_monthly_summary(c, year, month, income=0, expense=0, category=None):
-    """更新月汇总"""
-    c.execute('SELECT id, total_income, total_expense, category_expenses FROM monthly_summary WHERE year=? AND month=?',
-              (year, month))
-    row = c.fetchone()
-    
-    cat_exp = {}
-    if row and row[3]:
-        cat_exp = json.loads(row[3])
-    if category:
-        cat_exp[category] = cat_exp.get(category, 0) + expense
-    
-    if row:
-        c.execute('''UPDATE monthly_summary 
-                     SET total_income=total_income+?, total_expense=total_expense+?, category_expenses=?
-                     WHERE year=? AND month=?''',
-                  (income, expense, json.dumps(cat_exp), year, month))
-    else:
-        c.execute('''INSERT INTO monthly_summary (year, month, total_income, total_expense, category_expenses)
-                     VALUES (?, ?, ?, ?, ?)''',
-                  (year, month, income, expense, json.dumps(cat_exp)))
-
-def update_yearly_summary(c, year, income=0, expense=0, category=None):
-    """更新年汇总"""
-    c.execute('SELECT id, total_income, total_expense, category_expenses FROM yearly_summary WHERE year=?',
-              (year,))
-    row = c.fetchone()
-    
-    cat_exp = {}
-    if row and row[3]:
-        cat_exp = json.loads(row[3])
-    if category:
-        cat_exp[category] = cat_exp.get(category, 0) + expense
-    
-    if row:
-        c.execute('''UPDATE yearly_summary 
-                     SET total_income=total_income+?, total_expense=total_expense+?, category_expenses=?
-                     WHERE year=?''',
-                  (income, expense, json.dumps(cat_exp), year))
-    else:
-        c.execute('''INSERT INTO yearly_summary (year, total_income, total_expense, category_expenses)
-                     VALUES (?, ?, ?, ?)''',
-                  (year, income, expense, json.dumps(cat_exp)))
-
-def get_balance(date=None):
-    """获取指定日期的余额"""
+def compute_balance(date=None):
+    """实时从 transactions 计算余额"""
     conn = get_conn()
     c = conn.cursor()
     
     if date:
-        c.execute('SELECT balance FROM balance WHERE date<=? ORDER BY id DESC LIMIT 1', (date,))
+        c.execute('''
+            SELECT 
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) as income,
+                COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) as expense
+            FROM transactions 
+            WHERE date <= ?
+        ''', (date,))
     else:
-        c.execute('SELECT balance FROM balance ORDER BY id DESC LIMIT 1')
+        c.execute('''
+            SELECT 
+                COALESCE(SUM(CASE WHEN type='income' THEN amount ELSE 0 END), 0) as income,
+                COALESCE(SUM(CASE WHEN type='expense' THEN amount ELSE 0 END), 0) as expense
+            FROM transactions
+        ''')
     
     row = c.fetchone()
     conn.close()
-    return row[0] if row else 0
+    
+    income = row[0] if row else 0
+    expense = row[1] if row else 0
+    return income - expense
+
+def upsert_weekly_summary(c, year, week, week_start, week_end, amount, is_income, category=None):
+    """插入或更新周汇总"""
+    # 先尝试更新
+    if is_income:
+        c.execute('''
+            INSERT INTO weekly_summary (year, week, week_start, week_end, total_income)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(year, week) DO UPDATE SET total_income = total_income + ?
+        ''', (year, week, week_start, week_end, amount, amount))
+    else:
+        # 支出：更新总支出 + 更新分类
+        c.execute('SELECT category_expenses FROM weekly_summary WHERE year=? AND week=?', (year, week))
+        row = c.fetchone()
+        cat_exp = json.loads(row[0]) if row and row[0] else {} if row else {}
+        if category:
+            cat_exp[category] = cat_exp.get(category, 0) + amount
+        
+        c.execute('''
+            INSERT INTO weekly_summary (year, week, week_start, week_end, total_expense, category_expenses)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(year, week) DO UPDATE SET 
+                total_expense = total_expense + ?,
+                category_expenses = ?
+        ''', (year, week, week_start, week_end, amount, json.dumps(cat_exp), amount, json.dumps(cat_exp)))
+
+def upsert_monthly_summary(c, year, month, amount, is_income, category=None):
+    """插入或更新月汇总"""
+    if is_income:
+        c.execute('''
+            INSERT INTO monthly_summary (year, month, total_income)
+            VALUES (?, ?, ?)
+            ON CONFLICT(year, month) DO UPDATE SET total_income = total_income + ?
+        ''', (year, month, amount, amount))
+    else:
+        c.execute('SELECT category_expenses FROM monthly_summary WHERE year=? AND month=?', (year, month))
+        row = c.fetchone()
+        cat_exp = json.loads(row[0]) if row and row[0] else {} if row else {}
+        if category:
+            cat_exp[category] = cat_exp.get(category, 0) + amount
+        
+        c.execute('''
+            INSERT INTO monthly_summary (year, month, total_expense, category_expenses)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(year, month) DO UPDATE SET 
+                total_expense = total_expense + ?,
+                category_expenses = ?
+        ''', (year, month, amount, json.dumps(cat_exp), amount, json.dumps(cat_exp)))
+
+def upsert_yearly_summary(c, year, amount, is_income, category=None):
+    """插入或更新年汇总"""
+    if is_income:
+        c.execute('''
+            INSERT INTO yearly_summary (year, total_income)
+            VALUES (?, ?)
+            ON CONFLICT(year) DO UPDATE SET total_income = total_income + ?
+        ''', (year, amount, amount))
+    else:
+        c.execute('SELECT category_expenses FROM yearly_summary WHERE year=?', (year,))
+        row = c.fetchone()
+        cat_exp = json.loads(row[0]) if row and row[0] else {} if row else {}
+        if category:
+            cat_exp[category] = cat_exp.get(category, 0) + amount
+        
+        c.execute('''
+            INSERT INTO yearly_summary (year, total_expense, category_expenses)
+            VALUES (?, ?, ?)
+            ON CONFLICT(year) DO UPDATE SET 
+                total_expense = total_expense + ?,
+                category_expenses = ?
+        ''', (year, amount, json.dumps(cat_exp), amount, json.dumps(cat_exp)))
+
+def record_income(amount, description='', date=None):
+    """记录收入（同一事务内写入 transactions + 三个汇总表）"""
+    if date is None:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
+    conn = get_conn()
+    c = conn.cursor()
+    
+    try:
+        # 1. 写入 transactions
+        c.execute(
+            'INSERT INTO transactions (type, amount, category, description, date) VALUES (?, ?, ?, ?, ?)',
+            ('income', amount, '收入', description or '工资/收入', date)
+        )
+        
+        # 2. 更新周汇总
+        dt = datetime.strptime(date, '%Y-%m-%d')
+        year, week, week_start, week_end = get_week_info(dt)
+        upsert_weekly_summary(c, year, week, week_start, week_end, amount, is_income=True)
+        
+        # 3. 更新月汇总
+        upsert_monthly_summary(c, dt.year, dt.month, amount, is_income=True)
+        
+        # 4. 更新年汇总
+        upsert_yearly_summary(c, dt.year, amount, is_income=True)
+        
+        conn.commit()
+        current_balance = compute_balance()
+        conn.close()
+        return current_balance
+        
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise e
+
+def record_expense(amount, description='', date=None, category=None):
+    """记录支出（同一事务内写入 transactions + 三个汇总表）"""
+    if date is None:
+        date = datetime.now().strftime('%Y-%m-%d')
+    
+    if category is None:
+        # 如果没有传分类，返回 None 让调用者自己判断
+        category = '其他'
+    
+    conn = get_conn()
+    c = conn.cursor()
+    
+    try:
+        # 1. 写入 transactions
+        c.execute(
+            'INSERT INTO transactions (type, amount, category, description, date) VALUES (?, ?, ?, ?, ?)',
+            ('expense', amount, category, description, date)
+        )
+        
+        # 2. 更新周汇总
+        dt = datetime.strptime(date, '%Y-%m-%d')
+        year, week, week_start, week_end = get_week_info(dt)
+        upsert_weekly_summary(c, year, week, week_start, week_end, amount, is_income=False, category=category)
+        
+        # 3. 更新月汇总
+        upsert_monthly_summary(c, dt.year, dt.month, amount, is_income=False, category=category)
+        
+        # 4. 更新年汇总
+        upsert_yearly_summary(c, dt.year, amount, is_income=False, category=category)
+        
+        conn.commit()
+        current_balance = compute_balance()
+        conn.close()
+        return current_balance
+        
+    except Exception as e:
+        conn.rollback()
+        conn.close()
+        raise e
+
+def get_balance(date=None):
+    """获取指定日期的余额（实时计算）"""
+    return compute_balance(date)
 
 def get_monthly_report(year, month):
     """获取指定月份的收支报告"""
@@ -290,8 +298,6 @@ def get_monthly_report(year, month):
     
     income, expense, cat_json = row
     categories = json.loads(cat_json) if cat_json else {}
-    
-    # 计算结余
     balance = income - expense
     
     # 获取该月支出明细
@@ -388,16 +394,11 @@ def get_weekly_report(year, week):
         'category_expenses': categories
     }
 
-def get_current_month_expenses():
-    """获取当月消费情况"""
-    now = datetime.now()
-    return get_monthly_report(now.year, now.month)
-
 def get_recent_transactions(limit=10):
     """获取最近交易记录"""
     conn = get_conn()
     c = conn.cursor()
-    c.execute('SELECT type, amount, category, description, date FROM transactions ORDER BY date DESC, id DESC LIMIT ?',
+    c.execute('SELECT type, amount, category, description, date FROM transactions ORDER BY id DESC LIMIT ?',
               (limit,))
     rows = c.fetchall()
     conn.close()
@@ -442,8 +443,11 @@ def print_report(report):
         
         if report['category_expenses']:
             print(f"\n  📊 支出分类:")
+            total_exp = report['expense'] or 1
             for cat, amt in sorted(report['category_expenses'].items(), key=lambda x: -x[1]):
-                print(f"    {cat}: ¥{amt:.2f}")
+                pct = amt / total_exp * 100
+                bar = '█' * int(pct / 5) + '░' * (20 - int(pct / 5))
+                print(f"    {cat}: ¥{amt:.2f} ({pct:.1f}%) {bar}")
     
     elif 'year' in report and 'monthly' in report:
         # 年报
@@ -467,26 +471,24 @@ def print_report(report):
             print(f"    {m['month']}月: 收入¥{m['income']:.2f} 支出¥{m['expense']:.2f} 结余¥{m['balance']:.2f}")
 
 def main():
-    init_db()
-    
     if len(sys.argv) < 2:
         print("用法: python3 accounting.py <命令> [参数]")
         print("\n命令:")
-        print("  income <金额> [描述]     记录收入")
-        print("  expense <金额> [描述]    记录支出")
-        print("  balance [日期]           查询余额")
-        print("  month [年 月]            月度报告")
-        print("  year [年]                年度报告")
-        print("  week [年 周]             周报告")
-        print("  recent [条数]            最近记录")
-        print("  init                     初始化数据库")
+        print("  income <金额> [描述] [日期]     记录收入")
+        print("  expense <金额> [描述] [分类] [日期]    记录支出")
+        print("  balance [日期]                  查询余额")
+        print("  month [年 月]                   月度报告")
+        print("  year [年]                       年度报告")
+        print("  week [年 周]                    周报告")
+        print("  recent [条数]                   最近记录")
+        print("  init                           初始化数据库")
         return
     
     cmd = sys.argv[1]
     
     if cmd == 'init':
         init_db()
-        print("[OK] 数据库初始化完成")
+        print("[OK] 数据库初始化完成（已重建）")
     
     elif cmd == 'income':
         amount = float(sys.argv[2])
@@ -498,9 +500,10 @@ def main():
     elif cmd == 'expense':
         amount = float(sys.argv[2])
         desc = sys.argv[3] if len(sys.argv) > 3 else ''
-        date = sys.argv[4] if len(sys.argv) > 4 else None
-        balance = record_expense(amount, desc, date)
-        print(f"[OK] 已记录支出 ¥{amount:.2f}，当前余额 ¥{balance:.2f}")
+        category = sys.argv[4] if len(sys.argv) > 4 else None
+        date = sys.argv[5] if len(sys.argv) > 5 else None
+        balance = record_expense(amount, desc, date, category)
+        print(f"[OK] 已记录支出 ¥{amount:.2f}（{category}），当前余额 ¥{balance:.2f}")
     
     elif cmd == 'balance':
         date = sys.argv[2] if len(sys.argv) > 2 else None
@@ -536,9 +539,9 @@ def main():
         print(f"\n{'='*50}")
         print(f"  最近 {len(rows)} 条记录")
         print(f"{'='*50}")
-        for t, a, c, d, dt in rows:
+        for t, a, cat, d, dt in rows:
             typ = '💰' if t == 'income' else '💸'
-            print(f"  {typ} [{dt}] {d or c}: ¥{a:.2f}")
+            print(f"  {typ} [{dt}] {d or cat}: ¥{a:.2f}")
     
     else:
         print(f"未知命令: {cmd}")
