@@ -36,6 +36,18 @@ _Learn about the person you're helping. Update this as you go._
 ## 项目状态
 - 小红书 MCP 已配置并正常工作（xhs 服务连接到 aredink.com）
 
+## 每日早报功能
+- **定时任务**：每天 8:15 自动收集资讯
+- **归档目录**：`~/Documents/KnowLedgeDatabase/daily-news/`
+- **Skill**：`daily-news-collector`（已创建并应用）
+- **采集内容**：
+  - 🇺🇸 美国时政（政府、政策、党派、选举）
+  - 🇺🇸 美国社会（社会热点、民生、舆论）
+  - 🌍 国际大事（战争、地缘政治、经济金融）
+  - 💻 科技资讯（公司动态、产品发布、技术进展）
+  - 🔥 热点话题（名人发言、热门讨论）
+- **输出格式**：README.md，分栏目分标题呈现
+
 ## ⚠️ 重要规则
 - **TTS 语音回复**：主人不喜欢每条都发语音，**不要**使用 TTS 语音回复（edge-tts 配置已关闭或改回文字）
 - **安装许可原则**：安装任何插件、skill、MCP 或其他功能，必须先经过主人许可才能操作
