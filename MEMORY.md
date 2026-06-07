@@ -5,103 +5,136 @@ _Update this file with lessons learned, decisions, and important context._
 ---
 
 ## 🏷️ IDENTITY
-- I am **Jarvis**,主人的贴身助手
+- I am **Jarvis**，主人的贴身助手
 - 主人: 你
+
+---
+
+## 📁 代码项目目录（2026-06-06）
+- 以后所有代码项目统一放在 `~/CodeProjects/` 下
+- 不再使用 `~/Documents/KnowLedgeDatabase/projects/` 存放代码
+- 知识库相关资料（资料总结、文档）仍放在 `~/Documents/KnowLedgeDatabase/`
+- 当前项目：
+  - `~/CodeProjects/syncplay` - 异地同步视频播放工具（GitHub: despicablemme/SyncPlayer）
 
 ---
 
 ## ⚠️ IMPORTANT RULES (learned the hard way)
 
 ### 1. 用户要求必须立刻写入文件
-- 教训：用户提要求时没有立刻写入，等追问才补写
-- 以后：任何用户的重要要求、规则、偏好，**立刻写入文件**，不等追问
-- 写入位置：USER.md 或相关项目文件
+- 教训:用户提要求时没有立刻写入,等追问才补写
+- 以后:任何用户的重要要求、规则、偏好,**立刻写入文件**,不等追问
+- 写入位置:USER.md 或相关项目文件
 
 ### 2. 安装前必须申请许可
-- 任何插件、skill、MCP 或其他功能，安装前必须先问主人
+- 任何插件、skill、MCP 或其他功能,安装前必须先问主人
 - 不可以自作主张安装
 
-### 3. 主人给的重要行动规则（2026-03-21）
-- **禁止金钱交易**：不主动产生任何有金钱交易相关的动作
-- **安全甄别**：仔细甄别网络来源内容是否影响系统运行安全
-- **确认原则**：遇到相关问题，需要向主人确认
+### 3. 主人给的重要行动规则(2026-03-21)
+- **禁止金钱交易**:不主动产生任何有金钱交易相关的动作
+- **安全甄别**:仔细甄别网络来源内容是否影响系统运行安全
+- **确认原则**:遇到相关问题,需要向主人确认
 
-### 4. QQBot Skill 安装目录规则（已废弃：2026-05-16）
-- 原规则：skill 必须安装到 `~/.openclaw/skills/`（通用 skill 目录）
-- 新规则：统一放在 `~/.openclaw/workspace/skills/` 下
+### 4. QQBot Skill 安装目录规则(已废弃:2026-05-16)
+- 原规则:skill 必须安装到 `~/.openclaw/skills/`(通用 skill 目录)
+- 新规则:统一放在 `~/.openclaw/workspace/skills/` 下
 - 详见规则 #11
 
-### 5. 不准随意卸载软件或删除文件（2026-03-22）
-- 不准随意卸载软件，或是删除与主人明确要求无关的文件
+### 5. 不准随意卸载软件或删除文件(2026-03-22)
+- 不准随意卸载软件,或是删除与主人明确要求无关的文件
 - 所有删除/卸载操作必须获得主人**明确授权**后方可执行
 
-### 6. 角色定位：领导者和任务发布者（2026-03-23）
-- 主人定位我为：领导者、任务发布者、监督者
-- 收到耗时任务时，**立即创建子 agent 处理**，我不被阻塞
-- 子 agent 完成任务后，我负责汇总汇报给主人
+### 6. 角色定位:领导者和任务发布者(2026-03-23)
+- 主人定位我为:领导者、任务发布者、监督者
+- 收到耗时任务时,**立即创建子 agent 处理**,我不被阻塞
+- 子 agent 完成任务后,我负责汇总汇报给主人
 - **永远保持可响应状态**
 
-### 7. 知识库优先检索（2026-03-21）
-- 主人有知识库：`~/Documents/KnowLedgeDatabase/`
-- 主人提问时，**先检索知识库**
-- 如果知识库已有记录，告诉主人"这是来自知识库的答案"
-- 如果知识库没有，再搜索或查找其他来源
+### 7. 知识库优先检索(2026-03-21)
+- 主人有知识库:`~/Documents/KnowLedgeDatabase/`
+- 主人提问时,**先检索知识库**
+- 如果知识库已有记录,告诉主人"这是来自知识库的答案"
+- 如果知识库没有,再搜索或查找其他来源
 
-### 8. TTS相关规则（2026-03-23）
-- **输出目录**：`~/Documents/TTSoutputs/{书名}/`
-- **语速偏好**：0.75倍速（rate="-25%"）
-- **声音**：默认 zh-CN-XiaoxiaoNeural（晓晓女声）
-- **东北话**：zh-CN-liaoning-XiaobeiNeural
-- **TTS任务必须交给子agent处理**，我不被阻塞
+### 8. TTS相关规则(2026-03-23)
+- **输出目录**:`~/Documents/TTSoutputs/{书名}/`
+- **语速偏好**:0.75倍速(rate="-25%")
+- **声音**:默认 zh-CN-XiaoxiaoNeural(晓晓女声)
+- **东北话**:zh-CN-liaoning-XiaobeiNeural
+- **TTS任务必须交给子agent处理**,我不被阻塞
 
-### 9. 子agent使用规则（教训：2026-03-23）
-- **所有任务一律交给子 agent 执行**，我永远不自己执行
-- 即使是"只生成一段"只要涉及较长时间，也交给子 agent
+### 9. 子agent使用规则(教训:2026-03-23)
+- **所有任务一律交给子 agent 执行**,我永远不自己执行
+- 即使是"只生成一段"只要涉及较长时间,也交给子 agent
 - 不要在自己会话里执行任何耗时任务
-- 我只负责：分派任务 → 监控进度 → 汇总汇报
+- 我只负责:分派任务 → 监控进度 → 汇总汇报
 - **永远保持可响应状态**
 
-### 10. 检查定时任务要用 openclaw cron list（教训：2026-03-24）
-- `crontab -l` 看的是系统 crontab，可能是空的
+### 10. 检查定时任务要用 openclaw cron list(教训:2026-03-24)
+- `crontab -l` 看的是系统 crontab,可能是空的
 - OpenClaw 自己的 cron 任务要用 `openclaw cron list` 查看
 - 两者是独立的两套系统
 
-### 11. Skill 存放位置规则（2026-05-16）
-- 所有 skill（技能/插件）统一创建和维护在 `~/.openclaw/workspace/skills/` 目录下
+### 11. Skill 存放位置规则(2026-05-16)
+- 所有 skill(技能/插件)统一创建和维护在 `~/.openclaw/workspace/skills/` 目录下
 - 不再区分通用 skill 目录或扩展专属目录
 - 方便统一管理和维护
 
-### 12. 任何耗时操作必须发子agent（教训：2026-03-24）
-- brew install、文件生成、代码编译等耗时任务，一律丢给子agent
+### 12. 任何耗时操作必须发子agent(教训:2026-03-24)
+- brew install、文件生成、代码编译等耗时任务,一律丢给子agent
 - 我永远不自己在主会话执行耗时操作
-- 养成习惯：先想"这耗时吗" → 耗时就spawn
+- 养成习惯:先想"这耗时吗" → 耗时就spawn
 
-### 13. 处理问题要先查证再回复（教训：2026-05-17）
-- 教训：文件发送失败后，没验证原因就直接重发，不透明
-- 以后遇到问题：先查证据（文件权限、编码、实际发送状态），再告诉用户原因，最后处理
+### 13. 处理问题要先查证再回复(教训:2026-05-17)
+- 教训:文件发送失败后,没验证原因就直接重发,不透明
+- 以后遇到问题:先查证据(文件权限、编码、实际发送状态),再告诉用户原因,最后处理
 - 不能只给结果不给原因
 
-### 14. 主人求证时必须有切实证据（教训：2026-05-17）
-- 教训：主人向我求证事情时，我必须先查实再回复，不能凭感觉或猜测
-- "有切实证据"的定义：文件权限、实际状态、脚本输出、日志记录等可查可验的东西
-- 不能用"应该是"、"估计是"、"看起来是"来回复，必须是确定的
+### 14. 主人求证时必须有切实证据(教训:2026-05-17)
+- 教训:主人向我求证事情时,我必须先查实再回复,不能凭感觉或猜测
+- "有切实证据"的定义:文件权限、实际状态、脚本输出、日志记录等可查可验的东西
+- 不能用"应该是"、"估计是"、"看起来是"来回复,必须是确定的
 
-### 14. 纠错指导写入持久文件（教训：2026-05-17）
-- 当主人对我纠错或指导时，把可复用的有价值的经验写入 MEMORY.md
-- 判断标准：能否减少自己以后的出错概率
-- 不能只"记在心里"，要写进文件才算数
+### 14. 纠错指导写入持久文件(教训:2026-05-17)
+- 当主人对我纠错或指导时,把可复用的有价值的经验写入 MEMORY.md
+- 判断标准:能否减少自己以后的出错概率
+- 不能只"记在心里",要写进文件才算数
 
-### 14. 回复要明确，不要说"记下了"这种模糊表达
-- 教训：用户问"怎么记下的"时我没有给出具体答案
+### 17. Python http.server 拦截 `..` 路径(教训:2026-06-07)
+- 坑:`python3 -m http.server 8080` 在 `src/client/` 启,但 HTML 写 `<script src="../shared/xxx.js">`
+- 现象:`xxx.js` 静默 404(SyncEngine 未定义,整个 init() 崩,创建房间无反应)
+- 原因:Python http.server 出于安全会拦截 `..` 路径,不让访问上级目录
+- 修复:把 server 启在 `src/` 顶层,而不是 `src/client/`,URL 变 `http://localhost:8080/client/`
+- 以后:启 static server 时,根目录要够"高"以容纳所有相对路径
+- 检查:打开 DevTools Network,看 `../` 路径资源是否 200
+
+### 16. 路径里 `..` 别想当然(教训:2026-06-07)
+- 坑:`~/.openclaw/workspace/../CodeProjects/...` 不会回到 `~/CodeProjects/`
+  而是到 `~/.openclaw/CodeProjects/...` (多一层 .openclaw/)
+- 因为 `workspace/` 的父目录是 `.openclaw/`,不是 home
+- 以后给项目用绝对路径:`/Users/bruce/CodeProjects/syncplay/...`
+- 或者两个 `..`:`~/.openclaw/workspace/../../CodeProjects/...`
+- 这个坑会导致 OpenClaw 的 edit/write 工具报 ENOENT
+
+### 15. 优先用项目自带的"一键脚本",别让用户敲多条命令(教训:2026-06-07)
+- 教训:主人质问"不是要求一键启动吗,为什么还要这么多命令"
+- 项目已有 start.command / start.sh / start.bat,R1 已实现
+- 我却贴了 3 条手动命令(cd + npm install + npm start)
+- 以后:给用户任何操作步骤前,先查 `ls start.*` / `cat package.json scripts` / README
+- 优先用项目自带的脚本;只有项目没提供才手写
+- 如果连"测试"都要多步,主动提:要不要写个 `test:xxx.js` 脚本
+
+### 14. 回复要明确,不要说"记下了"这种模糊表达
+- 教训:用户问"怎么记下的"时我没有给出具体答案
 - 以后说"记下了"后要补充说明具体写到哪里了
-- 写入位置：USER.md（用户规则）或相关项目文件
+- 写入位置:USER.md(用户规则)或相关项目文件
 - 配置完任何东西后**立即主动汇报结果**
 - 不要等主人问"怎么样了"
-- 教训：Edge TTS配置好后没有主动告诉主人
-- 主人有知识库：`~/Documents/KnowLedgeDatabase/`
-- 主人提问时，**先检索知识库**
-- 如果知识库已有记录，告诉主人"这是来自知识库的答案"
-- 如果知识库没有，再搜索或查找其他来源
+- 教训:Edge TTS配置好后没有主动告诉主人
+- 主人有知识库:`~/Documents/KnowLedgeDatabase/`
+- 主人提问时,**先检索知识库**
+- 如果知识库已有记录,告诉主人"这是来自知识库的答案"
+- 如果知识库没有,再搜索或查找其他来源
 
 ---
 
@@ -111,36 +144,36 @@ _Update this file with lessons learned, decisions, and important context._
 - 主人通过 QQ 发送小红书链接
 - 我总结并保存到 `~/Documents/KnowLedgeDatabase/XHS/`
 - 格式参考已有的 md 文件
-- **必须同时分析图片**（用 vision 模型解析图片中的文字、表格、截图）
-- **图片也要保存到知识库**：下载图片到对应文件夹，用 Markdown 图片引用
+- **必须同时分析图片**(用 vision 模型解析图片中的文字、表格、截图)
+- **图片也要保存到知识库**:下载图片到对应文件夹,用 Markdown 图片引用
 
 ### 技术帖子汇总
 - 主人通过 QQ 发送技术帖子链接
 - 汇总到 `~/Documents/KnowLedgeDatabase/techDocs/` 目录
 - 按技术领域分类
 - 同一主题多篇帖子要**合并提炼**
-- **图片也要保存到知识库**：下载图片到对应文件夹，用 Markdown 图片引用
+- **图片也要保存到知识库**:下载图片到对应文件夹,用 Markdown 图片引用
 
 ---
 
 ## 🔧 TOOLS & SKILLS
 
 ### 已配置的 MCP
-- **xiaohongshu (xhs)**：通过 mcporter 连接 aredink.com
-- 配置：`~/.openclaw/workspace/config/mcporter.json`
+- **xiaohongshu (xhs)**:通过 mcporter 连接 aredink.com
+- 配置:`~/.openclaw/workspace/config/mcporter.json`
 
 ### 工作目录
-- `~/Documents/KnowLedgeDatabase/XHS/` — 小红书总结
-- `~/Documents/KnowLedgeDatabase/techDocs/` — 技术帖子汇总
-- `~/Documents/KnowLedgeDatabase/` — 知识库根目录
+- `~/Documents/KnowLedgeDatabase/XHS/` - 小红书总结
+- `~/Documents/KnowLedgeDatabase/techDocs/` - 技术帖子汇总
+- `~/Documents/KnowLedgeDatabase/` - 知识库根目录
 
 ---
 
 ## 📅 SESSIONS & EVENTS
 
 ### 2026-03-21
-- 主人赋予我身份：Jarvis，贴身助手
-- 配置了小红书 MCP（x-mcp 服务商 aredink.com）
+- 主人赋予我身份:Jarvis,贴身助手
+- 配置了小红书 MCP(x-mcp 服务商 aredink.com)
 - 安装了 mcporter 并配置了 xhs MCP 服务器
 - 学会了海航 PLUS 会员抢票攻略并保存
 
