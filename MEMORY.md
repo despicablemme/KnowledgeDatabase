@@ -371,6 +371,55 @@ _Update this file with lessons learned, decisions, and important context._
   - AGENT_PRACTICES #30 (verify env before ACP subagent) + #31 (本条)
 
 
+
+### 32. v0.6.x 工作流修订 v4 — C 先出 debug build, 主人验收通过才出 release, 阶段 E 落实最终文档 (教训:2026-06-13 22:25)
+
+- **触发**: 2026-06-13 22:25 主人强调 v3 缺关键约束: debug build 验收**通过**才**可**出 release, **不**是 debug build 跑通就出 release
+- **v4 核心**: 阶段 C = debug build trigger (auto, 主 agent verify env + 自己 trigger) → 通知主人验收 → 主人**通过** → 推 tag 触发 release → 阶段 E 落实最终文档
+- **debug → release 硬性顺序**: debug 验收**通过**才推 tag, **否则**走 NEED FIX, **不**出 release
+- **阶段 C 范围** (v4): 升 version + 落实**临时**文档 (不写 release 段) + 自己 trigger debug build
+- **阶段 D 范围** (v4): Release Build Trigger (推 git tag + push event 触发 release workflow), **不**自动推 tag (等主人验收)
+- **阶段 E 范围** (v4, 新): 最终文档落实 (release 完后 CHANGELOG 写真实 release 段, 加 release 时间/链接/assets; STATUS/ROADMAP 升 v<X+1> 立项; MEETINGS 加 #011 release 完工纪要)
+- **v4 终止点 1**: debug build 跑通 → 通知主人验收
+- **v4 终止点 2**: release 完 → 通知主人
+- **例外通知** (per #28/#29 + v4): trade-off 决策 / 方向缺失 / 3 次 debug build FAIL / 3 次 release FAIL
+- **推 git tag 必先 trigger debug build**: push tag 触发 release workflow (auto), v0.6.2 失误就因推 tag 跳过 debug
+- **关联**:
+  - `agentWorkflowAndTemplates/runbook.md` — 阶段 C 顶部 v4 + 阶段 D "Release Build Trigger" v4 + 新阶段 E "最终文档落实" v4
+  - `AGENT_PRACTICES.md` #32 — 完整版
+  - MEMORY #10 (subagent 失败主 agent 接手) + #28 (不打扰) + #29 (pass 默认走) + #30 (verify env) + #31 (v3)
+  - AGENT_PRACTICES #30 (verify env before ACP subagent) + #31 (v3) + #32 (本条 v4)
+
+
+
+### 33. workspace 仓库远端 URL 写错 + token 反复 revoke + 没配 SSH key (3 层错叠, 教训:2026-06-13 22:35)
+
+- **触发**: 2026-06-13 22:35 主人让我找 MyClaw 仓库 push 失败的根因 ("之前也失败又成功了, 找下失败经验")
+- **3 层根因** (per #14 真实证据):
+  1. **workspace 远端 URL 写错**: `.git/config` origin = `MyClaw.git` (404 Not Found), 实际 workspace 仓库远端是 `KnowledgeDatabase` (200 OK, master branch)
+  2. **token 1 早被 revoke** (per #5/#11): `ghp_hO…X7Uw` 5月16日 + 6月9日 revoke 过, .git/config 仍用这个 token → 推送必失败
+  3. **workspace 仓库没配 SSH key** (per #11 推荐永久方案没实施): `git ls-remote git@github.com:despicablemme/KnowledgeDatabase.git` 返 "Permission denied"
+- **6月7日 18:00 backup 实际成功过**: 远端 KnowledgeDatabase master HEAD `79f2f84 backup: 2026-06-07 18:05:10` (主人手动 push 5 分钟后, 之后改名为 KnowledgeDatabase, .git/config 没更新)
+- **主 agent 5 失误**:
+  1. 没 verify workspace 远端存在 (per #30 必 verify env, 没做)
+  2. 没查 workspace 实际是哪个仓库 (owner 下 22 个 public repos, 找跟本地内容相似的)
+  3. 没升级 workspace token (per #11 主动持久化, 没做)
+  4. 没配 SSH key (per #11 永久方案, 没做)
+  5. 没 fetch verify push 成功 (per #15 教训, 没做)
+- **加固规则** (避免下次再踩):
+  - ✅ 派 subagent / commit 前**必** verify env (per #30 扩展): `git remote -v` + `git ls-remote <url>` + `security find-internet-password -s github.com -w` + `ssh -T git@github.com`, 缺啥主 agent 自己装
+  - ✅ **workspace 仓库必配 SSH key** (永久, per #11 推荐): `ssh-keygen -t ed25519 -C "jarvis@openclaw" -f ~/.ssh/openclaw_github` + 主人推到 GitHub + `git remote set-url origin git@github.com:despicablemme/KnowledgeDatabase.git`
+  - ✅ token 只走 `/tmp/.gh_token` (chmod 600) 或 Keychain (per #5/#11), **绝不** echo 进 transcript / 写进 `T='ghp_...'` / 写进文档
+  - ✅ 推 tag / 改 origin / commit 前**必**真 verify push 成功 (per #15 fetch 验证)
+  - ✅ 远端改名/删/转 private 时**立刻**更新本地 origin URL (主人任何仓库改动必告诉主 agent)
+  - ❌ 不写 token 进 `.git/config` 明文 (per #5, 用 `git credential-osxkeychain store` 配 Keychain)
+  - ❌ 不信"之前 push 成功过" 就不 verify (per #15, 每次 push 必 fetch 验证)
+- **关联**:
+  - `agentWorkflowAndTemplates/runbook.md` 需加 "verify env before commit" 段
+  - AGENT_PRACTICES #5 (token 明文) + #6 (漏查 Keychain) + #11 (导出 token 配错) + #30 (verify env) + #31 (v3) + #32 (v4) + #33 (本条)
+  - MEMORY #5/#6/#11/#14/#30/#31/#32
+
+
 ## 📋 任务说明
 
 ### 小红书总结
