@@ -1,0 +1,174 @@
+{
+  "schema": "acpx.session.v1",
+  "acpx_record_id": "agent:claude:acp:f932db87-e04d-4243-a5b2-df0eeaadc461:oneshot:e7a55c2f-ae4a-4e8b-83b3-a1dfaf0c8f2b",
+  "acp_session_id": "6f51ab67-2ddc-4f42-a073-1a38a4254f35",
+  "agent_command": "\"/opt/homebrew/Cellar/node@22/22.22.1_3/bin/node\" \"/Users/bruce/.openclaw/acpx/claude-agent-acp-wrapper.mjs\"",
+  "cwd": "/Users/bruce/CodeProjects/syncplay",
+  "name": "agent:claude:acp:f932db87-e04d-4243-a5b2-df0eeaadc461",
+  "created_at": "2026-06-09T10:46:32.728Z",
+  "last_used_at": "2026-06-09T10:46:32.728Z",
+  "last_seq": 0,
+  "event_log": {
+    "active_path": "/Users/bruce/.acpx/sessions/agent%3Aclaude%3Aacp%3Af932db87-e04d-4243-a5b2-df0eeaadc461%3Aoneshot%3Ae7a55c2f-ae4a-4e8b-83b3-a1dfaf0c8f2b.stream.ndjson",
+    "segment_count": 5,
+    "max_segment_bytes": 67108864,
+    "max_segments": 5,
+    "last_write_error": null
+  },
+  "closed": true,
+  "closed_at": "2026-06-09T10:46:32.982Z",
+  "pid": 8419,
+  "agent_started_at": "2026-06-09T10:46:32.202Z",
+  "protocol_version": 1,
+  "agent_capabilities": {
+    "_meta": {
+      "claudeCode": {
+        "promptQueueing": true
+      }
+    },
+    "promptCapabilities": {
+      "image": true,
+      "embeddedContext": true
+    },
+    "mcpCapabilities": {
+      "http": true,
+      "sse": true
+    },
+    "loadSession": true,
+    "sessionCapabilities": {
+      "additionalDirectories": {},
+      "close": {},
+      "delete": {},
+      "fork": {},
+      "list": {},
+      "resume": {}
+    }
+  },
+  "title": null,
+  "messages": [],
+  "updated_at": "2026-06-09T10:46:32.728Z",
+  "cumulative_token_usage": {},
+  "request_token_usage": {},
+  "acpx": {
+    "current_model_id": "default",
+    "available_models": [
+      "default",
+      "opus",
+      "sonnet",
+      "haiku",
+      "MiniMax-M3"
+    ],
+    "config_options": [
+      {
+        "id": "mode",
+        "name": "Mode",
+        "description": "Session permission mode",
+        "category": "mode",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "auto",
+            "name": "Auto",
+            "description": "Use a model classifier to approve/deny permission prompts"
+          },
+          {
+            "value": "default",
+            "name": "Default",
+            "description": "Standard behavior, prompts for dangerous operations"
+          },
+          {
+            "value": "acceptEdits",
+            "name": "Accept Edits",
+            "description": "Auto-accept file edit operations"
+          },
+          {
+            "value": "plan",
+            "name": "Plan Mode",
+            "description": "Planning mode, no actual tool execution"
+          },
+          {
+            "value": "dontAsk",
+            "name": "Don't Ask",
+            "description": "Don't prompt for permissions, deny if not pre-approved"
+          },
+          {
+            "value": "bypassPermissions",
+            "name": "Bypass Permissions",
+            "description": "Bypass all permission checks"
+          }
+        ]
+      },
+      {
+        "id": "model",
+        "name": "Model",
+        "description": "AI model to use",
+        "category": "model",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "default",
+            "name": "Default (recommended)",
+            "description": "Use the default model (currently MiniMax-M3[1m]) · $5/$25 per Mtok"
+          },
+          {
+            "value": "opus",
+            "name": "MiniMax-M3",
+            "description": "Custom Opus model"
+          },
+          {
+            "value": "sonnet",
+            "name": "MiniMax-M3",
+            "description": "Custom Sonnet model"
+          },
+          {
+            "value": "haiku",
+            "name": "MiniMax-M3",
+            "description": "Custom Haiku model"
+          },
+          {
+            "value": "MiniMax-M3",
+            "name": "MiniMax-M3",
+            "description": "Custom model"
+          }
+        ]
+      },
+      {
+        "id": "effort",
+        "name": "Effort",
+        "description": "Available effort levels for this model",
+        "category": "thought_level",
+        "type": "select",
+        "currentValue": "default",
+        "options": [
+          {
+            "value": "default",
+            "name": "Default"
+          },
+          {
+            "value": "low",
+            "name": "Low"
+          },
+          {
+            "value": "medium",
+            "name": "Medium"
+          },
+          {
+            "value": "high",
+            "name": "High"
+          },
+          {
+            "value": "xhigh",
+            "name": "Xhigh"
+          },
+          {
+            "value": "max",
+            "name": "Max"
+          }
+        ]
+      }
+    ],
+    "reset_on_next_ensure": true
+  }
+}
